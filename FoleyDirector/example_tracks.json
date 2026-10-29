@@ -1,0 +1,14 @@
+{
+  "tracks": [
+    {
+      "prompt": "footsteps and impacts",
+      "events": ["footsteps", "footsteps", "", "impact", "impact", "", "", ""],
+      "weights": [1.0, 1.0, 0.0, 0.8, 0.8, 0.0, 0.0, 0.0]
+    },
+    {
+      "prompt": "room ambience",
+      "events": ["room ambience", "room ambience", "room ambience", "room ambience", "room ambience", "room ambience", "room ambience", "room ambience"],
+      "weights": [0.2, 0.2, 1.0, 0.2, 0.2, 1.0, 1.0, 1.0]
+    }
+  ]
+}

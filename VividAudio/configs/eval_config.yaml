@@ -1,0 +1,87 @@
+# Copyright 2024 Sony Research Inc.
+# Modifications Copyright 2026 ByteDance Ltd. and/or its affiliates
+# SPDX-License-Identifier: MIT
+
+defaults:
+  - eval_base_config
+  - override hydra/job_logging: custom-simplest
+  - _self_
+
+hydra:
+  run:
+    dir: ./output/${exp_id}
+  output_subdir: eval-${now:%Y-%m-%d_%H-%M-%S}-hydra
+
+exp_id: ${model}
+dataset: audiocaps
+duration_s: 8.0
+sep_fgc: True
+model_path: ${prefix}/checkpoints/vividaudio.pth
+fgctrain: True
+
+# for inference, this is the per-GPU batch size
+batch_size: 16
+output_name: null
+output_dir: ${prefix}/eval_output
+enable_grad_scaler: False
+flag: 30w
+joint_fgc: False
+delay_fusion: False
+interleaved_rope: False
+fusion_fgc_clip: False
+fgc_pt: 10
+fgc_pool: False
+fgc_v2: False
+random_seed: False
+inpainting: False
+bypass_empty_inpainting: False
+sync_rope: False
+cross_attn_delay: False
+local_window_size: 0
+
+# Adaptive Modality Gating. Keep this declared so Hydra overrides such as
+# zero_init_gate=False work in eval scripts under struct mode.
+zero_init_gate: True
+
+mask_rag_ratio: 0.0
+mask_rag_block_size: 10
+global_rag_cond: False
+dataset_jsonl: ""
+cfg_rag_weight: 0.5
+cfg_schedule_mode: base
+hybrid_cross_attn: False
+router_mode: False
+router_alpha: 1.0
+router_start_block: 0
+router_end_block: -1
+per_event_local_rag: False
+per_event_crossfade_frac: 0.05
+per_event_gap_style: "mean"
+global_emb_type: "beats" # 可选: "beats", "vae", "both"
+audio_feat_type: "beats"
+use_inpainting_input: True
+short_ref_mode: "stretch"       # "stretch" | "repeat" | "silence_pad"
+
+# --------- decoupled grag (与训练保持一致, 命令行 override 必须先在这里声明) ---------
+use_decoupled_grag: False
+grag_extractor_type: 'mean'   # 'mean' | 'qformer'
+grag_qformer_n_q: 8
+grag_qformer_n_layers: 2
+# Must match train_group.py when a checkpoint was trained with a decoupled
+# global source. In tail mode, each JSONL row should provide
+# `grag_tail_audio_path` (or `source_audio_path`) for the original clip.
+train_grag_source: "shared"       # "shared" | "tail" | "mix"
+train_grag_source_prob_tail: 0.5
+grag_tail_start_sec: null          # null -> duration_s (normally 8s)
+grag_tail_duration_sec: 2.0        # training uses the 8-10s tail
+
+# --------- CFG 优化开关 (A: degraded-RAG negative; B: interval + rescale) ---------
+# 默认全部 no-op, 与旧行为一致; 命令行 override 后才生效
+cfg_neg_source: 'zero'           # 'zero' (默认, 现行 neg_audio_list) | 'degrade'
+cfg_neg_noise_snr_db: 0.0        # >0 才注入高斯白噪, SNR 越小噪声越强
+cfg_neg_lowpass_cutoff_hz: 0.0   # >0 才启用一阶 low-pass
+cfg_neg_reverb_rt60_sec: 0.0     # >0 才启用短混响
+cfg_neg_reverb_wet: 0.3
+cfg_t_lo: 0.0                    # CFG 只在 t∈[cfg_t_lo, cfg_t_hi] 施加, 默认全区间
+cfg_t_hi: 1.0
+cfg_rescale_std: 0.0             # 0=off; 常用 0.5~0.7, 抑制大 w 下的过饱和

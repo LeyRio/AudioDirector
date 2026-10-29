@@ -1,0 +1,1 @@
+{"name":"example","video_path":"/path/to/video.mp4","prompt":"footsteps followed by a door closing in a quiet room","negative_prompt":"","rag_audio_list":["/path/to/footsteps.wav","/path/to/door.wav"],"rag_seg_in_ref":[[0.0,2.0],[1.0,2.0]],"rag_seg_in_gen":[[0.0,2.0],[4.0,5.0]],"neg_audio_list":[],"neg_seg_in_ref":[],"neg_seg_in_gen":[]}

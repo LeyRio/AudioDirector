@@ -1,0 +1,95 @@
+# Copyright 2024 Sony Research Inc.
+# Modifications Copyright 2026 ByteDance Ltd. and/or its affiliates
+# SPDX-License-Identifier: Apache-2.0
+
+hydra:
+  run:
+    dir: ${oc.env:OUTPUT_ROOT,./train_output}/${exp_id}
+  output_subdir: hydra
+
+exp_id: foleydirector
+model: medium_44k
+weights: null
+checkpoint: null
+seed: 14159265
+debug: false
+cudnn_benchmark: true
+compile: false
+amp: true
+enable_grad_scaler: false
+enable_email: false
+num_workers: 8
+pin_memory: true
+
+data_dim:
+  text_seq_len: 77
+  clip_dim: 1024
+  sync_dim: 768
+  text_dim: 1024
+
+data:
+  datasets:
+    - enabled: true
+      manifest: ${oc.env:DATA_ROOT,./data}/memmap/train.tsv
+      memmap_dir: ${oc.env:DATA_ROOT,./data}/memmap/train
+      annotations: ${oc.env:DATA_ROOT,./data}/annotations/fgc.jsonl
+
+batch_size: 32
+num_iterations: 300000
+learning_rate: 1.0e-4
+linear_warmup_steps: 1000
+lr_schedule: step
+lr_schedule_steps: [240000, 270000]
+lr_schedule_gamma: 0.1
+clip_grad_norm: 1.0
+weight_decay: 1.0e-6
+log_text_interval: 200
+log_extra_interval: 20000
+save_weights_interval: 10000
+save_checkpoint_interval: 10000
+save_copy_iterations: []
+
+train_full: true
+drop_ratio: 0.0
+video_drop_ratio: 0.0
+text_drop_ratio: 0.0
+with_details: true
+sep_fgc: true
+joint_fgc: false
+delay_fusion: false
+interleaved_rope: false
+fusion_fgc_clip: false
+clip_train: false
+dynamic_threshold: false
+dynamic_iterations: 5
+dt_list: [3.0, 4.5, 5.5, 6.5]
+v2_ratio: 0.0
+fgc_pool: false
+fgc_pt: 10
+fgc_dim: 1024
+use_muon: false
+
+sampling:
+  mean: 0.0
+  scale: 1.0
+  min_sigma: 0.0
+  method: euler
+  num_steps: 25
+null_condition_probability: 0.1
+cfg_strength: 4.5
+
+ema:
+  enable: true
+  start: 0
+  sigma_rels: [0.05, 0.1]
+  update_every: 1
+  checkpoint_every: 100000
+  checkpoint_folder: ${hydra:run.dir}/ema_ckpts
+
+vae_16k_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/v1-16.pth
+vae_44k_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/v1-44.pth
+bigvgan_vocoder_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/best_netG.pt
+synchformer_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/synchformer_state_dict.pth
+empty_string_feat: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/empty_string.pth
+clip_model_dir: ${oc.env:DATA_PREFIX,./data_root}/ckpt/DFN5B-CLIP-ViT-H-14-384
+clip_tokenizer_dir: ${oc.env:DATA_PREFIX,./data_root}/ckpt/ViT-H-14-378-quickgelu__dfn5b

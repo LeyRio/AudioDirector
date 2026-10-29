@@ -1,0 +1,82 @@
+# Copyright 2024 Sony Research Inc.
+# Modifications Copyright 2026 ByteDance Ltd. and/or its affiliates
+# SPDX-License-Identifier: MIT
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project]
+name = "vividaudio"
+version = "0.1.0"
+description = "Reference-conditioned video-to-audio generation with local and global pathways"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+]
+dependencies = [
+  "av>=14.0.1",
+  "colorlog",
+  "einops>=0.6",
+  "filelock>=3.29.0",
+  "gitpython>=3.1.51",
+  "huggingface-hub>=0.26",
+  "hydra-colorlog",
+  "hydra-core>=1.3.2",
+  "librosa>=0.8.1",
+  "matplotlib",
+  "msgpack>=1.2.1",
+  "nitrous-ema",
+  "numpy>=1.21,<2.1",
+  "omegaconf>=2.3",
+  "open-clip-torch>=2.29.0",
+  "packaging",
+  "pandas>=1.5",
+  "pillow>=12.3.0",
+  "python-dotenv",
+  "pytz",
+  "requests>=2.33.0",
+  "scipy>=1.7",
+  "soundfile",
+  "timm>=1.0.12",
+  "torch>=2.1",
+  "torchaudio>=2.1",
+  "torchdiffeq>=0.2.5",
+  "torchvision>=0.16",
+  "tensordict>=0.6.1",
+  "tensorboard>=2.11",
+  "tqdm>=4.66.1",
+  "transformers",
+  "urllib3>=2.7.0",
+]
+
+[project.optional-dependencies]
+encoders = ["hear21passt"]
+evaluation = [
+  "av-bench @ git+https://github.com/hkchengrex/av-benchmark.git@f351b9a6fc6abde746d5f8e1d4c47c883319cb41",
+]
+muon = ["muon-optimizer>=0.1.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["vividaudio", "beats"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"THIRD_PARTY_LICENSES.md" = "THIRD_PARTY_LICENSES.md"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["beats", "vividaudio/ext"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E731", "E741"]
+
+[tool.ruff.lint.per-file-ignores]
+"inference.py" = ["E402"]

@@ -1,0 +1,149 @@
+# Copyright 2024 Sony Research Inc.
+# Modifications Copyright 2026 ByteDance Ltd. and/or its affiliates
+# SPDX-License-Identifier: MIT
+
+hydra:
+  run:
+    dir: ${oc.env:OUTPUT_ROOT,./train_output}/${exp_id}
+  output_subdir: hydra
+
+exp_id: vividaudio
+model: medium_44k
+weights: null
+checkpoint: null
+seed: 14159265
+debug: false
+cudnn_benchmark: true
+compile: false
+amp: true
+enable_grad_scaler: false
+enable_email: false
+num_workers: 8
+pin_memory: true
+
+data_dim:
+  text_seq_len: 77
+  clip_dim: 1024
+  sync_dim: 768
+  text_dim: 1024
+
+data:
+  datasets:
+    - enabled: true
+      manifest: ${oc.env:DATA_ROOT,./data}/memmap/train.tsv
+      memmap_dir: ${oc.env:DATA_ROOT,./data}/memmap/train
+      annotations_dir: ${oc.env:DATA_ROOT,./data}/annotations/rag
+      audio_dir: ${oc.env:DATA_ROOT,./data}/audio
+      feature_dir: ${oc.env:DATA_ROOT,./data}/features
+      max_events: 10
+
+batch_size: 16
+num_iterations: 300000
+learning_rate: 1.0e-4
+linear_warmup_steps: 1000
+lr_schedule: step
+lr_schedule_steps: [240000, 270000]
+lr_schedule_gamma: 0.1
+clip_grad_norm: 1.0
+weight_decay: 1.0e-6
+log_text_interval: 200
+log_extra_interval: 20000
+save_weights_interval: 10000
+save_checkpoint_interval: 10000
+save_copy_iterations: []
+
+train_full: true
+drop_ratio: 0.0
+video_drop_ratio: 0.0
+text_drop_ratio: 0.0
+sep_fgc: true
+joint_fgc: false
+delay_fusion: false
+interleaved_rope: false
+fusion_fgc_clip: false
+clip_train: false
+fgc_pt: 49
+qformer: false
+inpainting: false
+bypass_empty_inpainting: false
+w_prefetch: false
+map_method: rms
+use_muon: false
+
+rag_dim: 768
+repa_dim: 768
+repa_weight: 0.0
+style_weight: 0.5
+frame_cos_weight: 1.0
+mask_seg_num_low: 1
+mask_seg_num_high: 4
+min_mask_len_ratio: 0.05
+max_mask_len_ratio: 0.5
+zero_mask_ratio: 0.0
+sync_rope: false
+cross_attn_delay: false
+local_window_size: 0
+hybrid_cross_attn: false
+zero_init_gate: true
+mask_rag_ratio: 0.0
+mask_rag_block_size: 10
+global_rag_cond: false
+global_emb_type: beats
+audio_feat_type: beats
+use_decoupled_grag: false
+train_grag_mode: full
+train_grag_source: shared
+train_grag_source_prob_tail: 0.5
+grag_extractor_type: mean
+grag_qformer_n_q: 8
+grag_qformer_n_layers: 2
+use_global_grag_cosine_loss: false
+global_grag_cosine_weight: 0.02
+use_vae_latent_style_loss: false
+vae_latent_style_weight: 0.02
+vae_latent_style_t_min: 0.7
+vae_latent_style_stat_weight: 0.5
+use_semantic_anchor_loss: false
+semantic_anchor_weight: 0.02
+semantic_anchor_t_min: 0.3
+semantic_anchor_delta_weight: 0.5
+
+prob_same_group: 0.5
+prob_speed_change: 0.4
+prob_mix: 0.0
+prob_degradation: 0.0
+prob_empty: 0.1
+rag_emb_source: full_features
+aug_mix_snr_db_low: -5.0
+aug_mix_snr_db_high: 15.0
+aug_noise_snr_db_low: 10.0
+aug_noise_snr_db_high: 30.0
+aug_lowpass_cutoff_low: 2000.0
+aug_lowpass_cutoff_high: 8000.0
+aug_reverb_rt60_low: 0.1
+aug_reverb_rt60_high: 0.5
+aug_reverb_wet_low: 0.1
+aug_reverb_wet_high: 0.4
+
+sampling:
+  mean: 0.0
+  scale: 1.0
+  min_sigma: 0.0
+  method: euler
+  num_steps: 25
+null_condition_probability: 0.1
+cfg_strength: 4.5
+
+ema:
+  enable: true
+  start: 0
+  sigma_rels: [0.05, 0.1]
+  update_every: 1
+  checkpoint_every: 100000
+  checkpoint_folder: ${hydra:run.dir}/ema_ckpts
+
+vae_16k_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/v1-16.pth
+vae_44k_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/v1-44.pth
+bigvgan_vocoder_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/best_netG.pt
+synchformer_ckpt: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/synchformer_state_dict.pth
+empty_string_feat: ${oc.env:DATA_PREFIX,./data_root}/checkpoints/empty_string.pth
